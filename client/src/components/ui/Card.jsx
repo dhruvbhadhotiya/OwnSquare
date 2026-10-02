@@ -55,11 +55,15 @@ export function KpiCard({
     neutral: 'bg-gray-100 text-gray-600 border-gray-200'
   };
 
+  const Container = onClick ? 'button' : 'div';
+
   return (
-    <div
+    <Container
+      type={onClick ? 'button' : undefined}
       onClick={onClick}
+      aria-label={onClick ? `${title}: ${value}. ${subtitle || ''}. Open wallet.` : undefined}
       className={`bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden ${
-        onClick ? 'cursor-pointer' : ''
+        onClick ? 'w-full cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2' : ''
       } ${className}`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -87,7 +91,7 @@ export function KpiCard({
           {disclosure}
         </p>
       )}
-    </div>
+    </Container>
   );
 }
 

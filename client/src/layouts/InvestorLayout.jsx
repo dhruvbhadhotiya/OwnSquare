@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { formatINR } from '../utils/formatINR.js';
 import { StatusChip } from '../components/StatusChip.jsx';
 
@@ -10,12 +10,25 @@ export function InvestorLayout({
   userName = 'Aman Sharma',
   userEmail = 'aman@demo.com',
   onQuickTopUp,
-  onViewSwitch,
-  currentView = 'investor',
   children
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    try {
+      return window.localStorage.getItem('ownsquare-investor-theme') === 'light' ? 'light' : 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('ownsquare-investor-theme', theme);
+    } catch {
+      return;
+    }
+  }, [theme]);
 
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: '📊', description: 'Overview & KPIs' },
@@ -32,50 +45,7 @@ export function InvestorLayout({
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA] flex flex-col font-sans">
-      {/* Top Banner - Academic Project Notice */}
-      <div className="bg-[#0F2A4A] text-white px-4 py-1.5 text-xs text-center font-medium flex items-center justify-between border-b border-white/10">
-        <div className="flex-1 text-center">
-          <span className="font-semibold text-[#D4A017] mr-1.5">Academic Project:</span>
-          OwnSquare Fractional Real Estate Portal &bull; No real money or securities are involved.
-        </div>
-        {onViewSwitch && (
-          <div className="hidden sm:flex items-center space-x-2 text-xs">
-            <span className="text-gray-300">View Mode:</span>
-            <button
-              onClick={() => onViewSwitch('investor')}
-              className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-colors ${
-                currentView === 'investor'
-                  ? 'bg-[#10B981] text-white'
-                  : 'bg-white/10 hover:bg-white/20 text-gray-200'
-              }`}
-            >
-              Investor
-            </button>
-            <button
-              onClick={() => onViewSwitch('marketplace')}
-              className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-colors ${
-                currentView === 'marketplace'
-                  ? 'bg-[#10B981] text-white'
-                  : 'bg-white/10 hover:bg-white/20 text-gray-200'
-              }`}
-            >
-              Public
-            </button>
-            <button
-              onClick={() => onViewSwitch('admin')}
-              className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-colors ${
-                currentView === 'admin'
-                  ? 'bg-[#10B981] text-white'
-                  : 'bg-white/10 hover:bg-white/20 text-gray-200'
-              }`}
-            >
-              Admin
-            </button>
-          </div>
-        )}
-      </div>
-
+    <div className="investor-shell min-h-screen bg-[#F7F8FA] flex flex-col font-sans" data-theme={theme}>
       <div className="flex flex-1 overflow-hidden">
         {/* Desktop Sidebar */}
         <aside className="hidden md:flex md:w-64 md:flex-col bg-[#0F2A4A] text-white border-r border-[#1A3D66] flex-shrink-0">
@@ -87,9 +57,6 @@ export function InvestorLayout({
             <div>
               <div className="text-lg font-bold tracking-tight text-white flex items-center">
                 OwnSquare
-                <span className="ml-2 px-1.5 py-0.5 text-[10px] font-extrabold uppercase rounded bg-[#10B981]/20 text-[#10B981] border border-[#10B981]/30">
-                  Investor
-                </span>
               </div>
               <p className="text-[11px] text-gray-400">Fractional Real Estate</p>
             </div>
@@ -202,10 +169,24 @@ export function InvestorLayout({
                   </button>
                 </div>
 
-                {/* KYC Badge */}
-                <div className="hidden md:block">
-                  <StatusChip status={kycStatus} />
-                </div>
+                <button
+                  type="button"
+                  className="investor-theme-toggle"
+                  onClick={() => setTheme((currentTheme) => currentTheme === 'dark' ? 'light' : 'dark')}
+                  aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                  title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                >
+                  {theme === 'dark' ? (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+                      <circle cx="12" cy="12" r="3.5" />
+                      <path strokeLinecap="round" d="M12 2.5v2m0 15v2m9.5-9.5h-2m-15 0h-2m16.22-6.72-1.42 1.42M6.7 17.3l-1.42 1.42m13.44 0-1.42-1.42M6.7 6.7 5.28 5.28" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M20.3 15.2A8.5 8.5 0 0 1 8.8 3.7 8.5 8.5 0 1 0 20.3 15.2Z" />
+                    </svg>
+                  )}
+                </button>
 
                 {/* Profile Pill */}
                 <div className="relative">
@@ -227,7 +208,7 @@ export function InvestorLayout({
 
                   {/* Profile Dropdown */}
                   {profileDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-30">
+                    <div className="investor-profile-dropdown absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-30">
                       <div className="px-4 py-2 border-b border-gray-100">
                         <p className="text-xs font-bold text-gray-900">{userName}</p>
                         <p className="text-[11px] text-gray-500 truncate">{userEmail}</p>
@@ -287,31 +268,6 @@ export function InvestorLayout({
                   </button>
                 ))}
 
-                {onViewSwitch && (
-                  <div className="pt-3 mt-3 border-t border-white/10 flex items-center justify-between text-xs">
-                    <span className="text-gray-400">Switch View:</span>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => onViewSwitch('investor')}
-                        className="px-2.5 py-1 rounded bg-[#10B981] text-white font-semibold"
-                      >
-                        Investor
-                      </button>
-                      <button
-                        onClick={() => onViewSwitch('marketplace')}
-                        className="px-2.5 py-1 rounded bg-white/10 text-white font-semibold"
-                      >
-                        Public
-                      </button>
-                      <button
-                        onClick={() => onViewSwitch('admin')}
-                        className="px-2.5 py-1 rounded bg-white/10 text-white font-semibold"
-                      >
-                        Admin
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
           </header>
